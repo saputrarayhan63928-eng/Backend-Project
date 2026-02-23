@@ -1,25 +1,25 @@
 import { Router } from "express";
 import {
-  getAllItems,
-  getItemById,
-  createItem,
-  updateItem,
-  deleteItem,
-  searchItem,
+  getAllProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  searchProduct,
 } from "../controllers/product.controller";
 import {
   validate,
-  createItemValidation,
-  getItemByIdValidation,
+  createProductValidation,
+  getProductByIdValidation,
 } from "../validations/product.validation";
 
-const router = Router()
+const router = Router();
 
-router.get('/' ,getAllItems)
-router.get('/search', searchItem)
-router.get('/:id', validate(getItemByIdValidation), getItemById)
-router.post('/', validate(createItemValidation), createItem)
-router.put('/:id' , validate(createItemValidation), updateItem)
-router.delete('/:id', validate(getItemByIdValidation), deleteItem)
+router.get('/', getAllProducts);
+router.get('/search', searchProduct);
+router.get('/:id', validate(getProductByIdValidation), getProductById);
+router.post('/', validate(createProductValidation), createProduct);
+router.put('/:id', validate(createProductValidation), updateProduct);
+router.delete('/:id', validate(getProductByIdValidation), deleteProduct);
 
-export default router
+export default router;

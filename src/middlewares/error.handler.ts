@@ -1,6 +1,7 @@
 import { type Request, type Response, type NextFunction } from "express";
 import { errorResponse } from "../utils/response";
 import { NODE_ENV } from "../utils/env";
+// import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 export const errorHandler = (
   err: any,
@@ -10,11 +11,26 @@ export const errorHandler = (
 ) => {
   console.error("ERROR:", err.message);
 
-  const statusCode = err.message.includes("tidak di temukan") ? 404 : 400;
+  let statusCode = 500;
+  let message = "Terjadi kesalahan server";
+
+  if (err.code === 'P2002') {
+    statusCode = 409;
+    message = "Data sudah ada (unique constraint violation)";
+  } else if (err.code === 'P2025') {
+    statusCode = 404;
+    message = "Data tidak ditemukan";
+  } else if (err.message.includes("not found") || err.message.includes("tidak ditemukan")) {
+    statusCode = 404;
+    message = err.message;
+  } else if (err.message) {
+    statusCode = 400;
+    message = err.message;
+  }
 
   errorResponse(
     res,
-    err.message || "terjadi kesalahan server",
+    message,
     statusCode,
     NODE_ENV === "development" ? { stack: err.stack } : null,
   );

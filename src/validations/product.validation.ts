@@ -13,7 +13,7 @@ export const validate = (validations: ValidationChain[]) => {
 
     const errors = validationResult(req);
     if (errors.isEmpty()) {
-      return next;
+      return next();
     }
 
     const errorList = errors.array().map((err: any) => ({
@@ -25,26 +25,33 @@ export const validate = (validations: ValidationChain[]) => {
   };
 };
 
-export const createItemValidation = [
-  body("nama")
+export const createProductValidation = [
+  body("name")
     .trim()
     .notEmpty()
-    .withMessage("Nama Item wajib di isi")
+    .withMessage("Nama produk wajib diisi")
     .isLength({ min: 3 })
-    .withMessage("Nama item minimal 3 karakter"),
+    .withMessage("Nama produk minimal 3 karakter"),
 
-  body("penulis").trim().notEmpty().withMessage("Penulis wajib diisi"),
-
-  body("rilis").trim().notEmpty().withMessage("Rilis wajib diisi"),
+  body("price")
+    .isNumeric()
+    .withMessage("Harga harus angka")
+    .custom((value) => value > 0)
+    .withMessage("Harga harus lebih dari 0"),
 
   body("stock")
     .isNumeric()
     .withMessage("Stock harus angka")
-    .custom((value) => value > 0)
-    .withMessage("Stock harus lebih dari 0"),
+    .custom((value) => value >= 0)
+    .withMessage("Stock harus 0 atau lebih"),
+
+  body("categoryId")
+    .optional()
+    .isUUID()
+    .withMessage("Category ID harus UUID valid"),
 ];
 
-export const getItemByIdValidation = [
+export const getProductByIdValidation = [
   param('id')
-    .isNumeric().withMessage('ID harus angka')
-]
+    .isUUID().withMessage('ID harus UUID valid')
+];
