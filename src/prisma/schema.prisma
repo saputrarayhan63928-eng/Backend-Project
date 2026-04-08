@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum BorrowStatus {
+  BORROWED
+  RETURNED
+}
+
+model Category {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique
+  products  Product[] // Relasi balik: 1 Kategori -> Banyak Produk
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("categories")
+}
+
+model Product {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  author      String?
+  publishedYear Int?
+  coverImageUrl String?
+  description String?
+  price       Decimal   @db.Decimal(10, 2)
+  stock       Int       @default(0)
+  
+  // === TAMBAHAN RELASI ===
+  categoryId  String?   @db.Uuid // Foreign Key
+  category    Category? @relation(fields: [categoryId], references: [id])
+  borrowItems BorrowItem[]
+  // =======================
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@map("products")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(MEMBER)
+  orders    Order[]  // Relasi: 1 User -> Banyak Order
+  borrowRecords BorrowRecord[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@map("users")
+}
+
+model Order {
+  id          String   @id @default(uuid()) @db.Uuid
+  total       Decimal  @db.Decimal(10, 2)
+  status      String   @default("pending")
+  
+  // Relasi ke User
+  userId      String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@map("orders")
+}
+
+model BorrowRecord {
+  id          String       @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  user        User         @relation(fields: [userId], references: [id])
+  status      BorrowStatus @default(BORROWED)
+  dueDate     DateTime?
+  returnedAt  DateTime?
+  notes       String?
+  items       BorrowItem[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@map("borrow_records")
+}
+
+model BorrowItem {
+  id             String       @id @default(uuid()) @db.Uuid
+  borrowRecordId String       @db.Uuid
+  borrowRecord   BorrowRecord @relation(fields: [borrowRecordId], references: [id])
+  productId      String       @db.Uuid
+  product        Product      @relation(fields: [productId], references: [id])
+  quantity       Int          @default(1)
+  createdAt      DateTime     @default(now())
+
+  @@unique([borrowRecordId, productId])
+  @@map("borrow_items")
+}
