@@ -10,6 +10,7 @@ import {
 import {
   validate,
   createProductValidation,
+  updateProductValidation,
   getProductByIdValidation,
 } from "../validations/product.validation";
 import { adminOnly, verifyToken } from "../middlewares/auth.middleware";
@@ -21,7 +22,7 @@ router.get('/', getAllProducts);
 router.get('/search', searchProduct);
 router.get('/:id', validate(getProductByIdValidation), getProductById);
 router.post('/', adminOnly, validate(createProductValidation), createProduct);
-router.put('/:id', adminOnly, validate(createProductValidation), updateProduct);
+router.put('/:id', adminOnly, validate(updateProductValidation), updateProduct);
 router.delete('/:id', adminOnly, validate(getProductByIdValidation), deleteProduct);
 
 export default router;

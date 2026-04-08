@@ -3,6 +3,8 @@ import { Prisma } from "@prisma/client";
 
 type CreateProductInput = {
   name: string;
+  author?: string;
+  publishedYear?: number;
   description?: string;
   price: number;
   stock: number;
@@ -11,26 +13,65 @@ type CreateProductInput = {
 
 type UpdateProductInput = {
   name?: string;
+  author?: string;
+  publishedYear?: number;
   description?: string;
   price?: number;
   stock?: number;
   categoryId?: string;
 };
 
+type ProductQueryOptions = {
+  page: number;
+  limit: number;
+  search?: string;
+  sortBy?: "title" | "publishedYear";
+  sortOrder?: "asc" | "desc";
+};
+
 export class ProductRepository {
-  static findMany(page: number, limit: number) {
-    const skip = (page - 1) * limit;
+  static findMany(options: ProductQueryOptions) {
+    const skip = (options.page - 1) * options.limit;
+    const where = {
+      deletedAt: null,
+      ...(options.search
+        ? {
+            OR: [
+              { name: { contains: options.search, mode: "insensitive" as const } },
+              { author: { contains: options.search, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    };
+
+    const orderBy =
+      options.sortBy === "publishedYear"
+        ? { publishedYear: options.sortOrder || "desc" }
+        : { name: options.sortOrder || "asc" };
+
     return prisma.product.findMany({
-      where: { deletedAt: null },
+      where,
       include: { category: true },
       skip,
-      take: limit,
-      orderBy: { createdAt: "desc" },
+      take: options.limit,
+      orderBy,
     });
   }
 
-  static countAll() {
-    return prisma.product.count({ where: { deletedAt: null } });
+  static countAll(search?: string) {
+    return prisma.product.count({
+      where: {
+        deletedAt: null,
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: "insensitive" } },
+                { author: { contains: search, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+      },
+    });
   }
 
   static findById(id: string) {
@@ -117,13 +158,13 @@ export class ProductRepository {
         deletedAt: null,
         OR: [
           { name: { contains: keyword, mode: "insensitive" } },
-          { description: { contains: keyword, mode: "insensitive" } },
+          { author: { contains: keyword, mode: "insensitive" } },
         ],
       },
       include: { category: true },
       skip,
       take: limit,
-      orderBy: { createdAt: "desc" },
+      orderBy: { name: "asc" },
     });
   }
 
@@ -133,7 +174,7 @@ export class ProductRepository {
         deletedAt: null,
         OR: [
           { name: { contains: keyword, mode: "insensitive" } },
-          { description: { contains: keyword, mode: "insensitive" } },
+          { author: { contains: keyword, mode: "insensitive" } },
         ],
       },
     });

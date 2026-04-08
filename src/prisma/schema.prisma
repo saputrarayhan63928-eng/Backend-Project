@@ -36,6 +36,8 @@ model Category {
 model Product {
   id          String    @id @default(uuid()) @db.Uuid
   name        String
+  author      String?
+  publishedYear Int?
   description String?
   price       Decimal   @db.Decimal(10, 2)
   stock       Int       @default(0)

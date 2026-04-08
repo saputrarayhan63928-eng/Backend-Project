@@ -2,16 +2,47 @@ import { CategoryRepository } from "../repositories/category.repository";
 import { ProductRepository } from "../repositories/product.repository";
 
 export class ProductService {
-  static async getAll(page: number = 1, limit: number = 10) {
-    const safePage = Math.max(1, page);
-    const safeLimit = Math.max(1, limit);
+  static async getAll(params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: "title" | "publishedYear";
+    sortOrder?: "asc" | "desc";
+  }) {
+    const safePage = Math.max(1, params.page || 1);
+    const safeLimit = Math.max(1, params.limit || 10);
+    const normalizedSearch = params.search?.trim();
+    const safeSortBy = params.sortBy === "publishedYear" ? "publishedYear" : "title";
+    const safeSortOrder = params.sortOrder === "desc" ? "desc" : "asc";
+
+    const queryOptions: {
+      page: number;
+      limit: number;
+      search?: string;
+      sortBy: "title" | "publishedYear";
+      sortOrder: "asc" | "desc";
+    } = {
+      page: safePage,
+      limit: safeLimit,
+      sortBy: safeSortBy,
+      sortOrder: safeSortOrder,
+    };
+    if (normalizedSearch) queryOptions.search = normalizedSearch;
 
     const [products, total] = await Promise.all([
-      ProductRepository.findMany(safePage, safeLimit),
-      ProductRepository.countAll(),
+      ProductRepository.findMany(queryOptions),
+      ProductRepository.countAll(normalizedSearch),
     ]);
 
-    return { products, total, page: safePage, limit: safeLimit };
+    return {
+      products,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      search: normalizedSearch || null,
+      sortBy: safeSortBy,
+      sortOrder: safeSortOrder,
+    };
   }
 
   static async getById(id: string) {
@@ -23,6 +54,8 @@ export class ProductService {
 
   static async create(data: {
     name: string;
+    author?: string;
+    publishedYear?: number;
     description?: string;
     price: number;
     stock: number;
@@ -31,6 +64,13 @@ export class ProductService {
     if (data.price <= 0) throw new Error("Harga harus lebih dari 0");
     if (data.stock < 0) throw new Error("Stock harus 0 atau lebih");
 
+    if (
+      typeof data.publishedYear === "number" &&
+      (data.publishedYear < 1000 || data.publishedYear > 9999)
+    ) {
+      throw new Error("publishedYear harus 4 digit tahun yang valid");
+    }
+
     if (data.categoryId) {
       const category = await CategoryRepository.findActiveById(data.categoryId);
       if (!category) throw new Error("Category not found");
@@ -38,6 +78,8 @@ export class ProductService {
 
     const payload: {
       name: string;
+      author?: string;
+      publishedYear?: number;
       price: number;
       stock: number;
       description?: string;
@@ -51,6 +93,10 @@ export class ProductService {
     if (typeof data.description === "string") {
       payload.description = data.description.trim();
     }
+    if (typeof data.author === "string") payload.author = data.author.trim();
+    if (typeof data.publishedYear === "number") {
+      payload.publishedYear = data.publishedYear;
+    }
 
     if (data.categoryId) {
       payload.categoryId = data.categoryId;
@@ -63,6 +109,8 @@ export class ProductService {
     id: string,
     data: {
       name?: string;
+      author?: string;
+      publishedYear?: number;
       description?: string;
       price?: number;
       stock?: number;
@@ -79,6 +127,12 @@ export class ProductService {
     if (typeof data.stock === "number" && data.stock < 0) {
       throw new Error("Stock harus 0 atau lebih");
     }
+    if (
+      typeof data.publishedYear === "number" &&
+      (data.publishedYear < 1000 || data.publishedYear > 9999)
+    ) {
+      throw new Error("publishedYear harus 4 digit tahun yang valid");
+    }
 
     if (data.categoryId) {
       const category = await CategoryRepository.findActiveById(data.categoryId);
@@ -87,6 +141,8 @@ export class ProductService {
 
     const payload: {
       name?: string;
+      author?: string;
+      publishedYear?: number;
       description?: string;
       price?: number;
       stock?: number;
@@ -94,6 +150,10 @@ export class ProductService {
     } = {};
 
     if (typeof data.name === "string") payload.name = data.name.trim();
+    if (typeof data.author === "string") payload.author = data.author.trim();
+    if (typeof data.publishedYear === "number") {
+      payload.publishedYear = data.publishedYear;
+    }
     if (typeof data.description === "string") {
       payload.description = data.description.trim();
     }

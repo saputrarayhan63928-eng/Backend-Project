@@ -6,8 +6,29 @@ import { successResponse } from "../utils/response";
 export const getAllProducts = asyncHandler(async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    const result = await ProductService.getAll(page, limit);
-    return successResponse(res, 'Daftar Produk', result);
+    const search = typeof req.query.search === "string" ? req.query.search : undefined;
+    const sortBy =
+      req.query.sortBy === "publishedYear" || req.query.sortBy === "title"
+        ? req.query.sortBy
+        : undefined;
+    const sortOrder =
+      req.query.sortOrder === "asc" || req.query.sortOrder === "desc"
+        ? req.query.sortOrder
+        : undefined;
+
+    const listParams: {
+      page: number;
+      limit: number;
+      search?: string;
+      sortBy?: "title" | "publishedYear";
+      sortOrder?: "asc" | "desc";
+    } = { page, limit };
+    if (search) listParams.search = search;
+    if (sortBy) listParams.sortBy = sortBy;
+    if (sortOrder) listParams.sortOrder = sortOrder;
+
+    const result = await ProductService.getAll(listParams);
+    return successResponse(res, 'Daftar Buku', result);
 });
 
 export const getProductById = asyncHandler(async (req: Request, res: Response) => {

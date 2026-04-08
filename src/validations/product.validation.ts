@@ -33,6 +33,17 @@ export const createProductValidation = [
     .isLength({ min: 3 })
     .withMessage("Nama produk minimal 3 karakter"),
 
+  body("author")
+    .optional()
+    .trim()
+    .isLength({ min: 2 })
+    .withMessage("Author minimal 2 karakter"),
+
+  body("publishedYear")
+    .optional()
+    .isInt({ min: 1000, max: 9999 })
+    .withMessage("publishedYear harus tahun 4 digit valid"),
+
   body("price")
     .isNumeric()
     .withMessage("Harga harus angka")
@@ -43,6 +54,44 @@ export const createProductValidation = [
     .isNumeric()
     .withMessage("Stock harus angka")
     .custom((value) => value >= 0)
+    .withMessage("Stock harus 0 atau lebih"),
+
+  body("categoryId")
+    .optional()
+    .isUUID()
+    .withMessage("Category ID harus UUID valid"),
+];
+
+export const updateProductValidation = [
+  body("name")
+    .optional()
+    .trim()
+    .isLength({ min: 3 })
+    .withMessage("Nama produk minimal 3 karakter"),
+
+  body("author")
+    .optional()
+    .trim()
+    .isLength({ min: 2 })
+    .withMessage("Author minimal 2 karakter"),
+
+  body("publishedYear")
+    .optional()
+    .isInt({ min: 1000, max: 9999 })
+    .withMessage("publishedYear harus tahun 4 digit valid"),
+
+  body("price")
+    .optional()
+    .isNumeric()
+    .withMessage("Harga harus angka")
+    .custom((value) => Number(value) > 0)
+    .withMessage("Harga harus lebih dari 0"),
+
+  body("stock")
+    .optional()
+    .isNumeric()
+    .withMessage("Stock harus angka")
+    .custom((value) => Number(value) >= 0)
     .withMessage("Stock harus 0 atau lebih"),
 
   body("categoryId")
