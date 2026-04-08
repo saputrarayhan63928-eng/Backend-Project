@@ -46,3 +46,17 @@ export const createBorrowValidation = [
 export const getBorrowByIdValidation = [
   param("id").isUUID().withMessage("ID harus UUID valid"),
 ];
+
+export const borrowValidation = [
+  body()
+    .isArray({ min: 1 })
+    .withMessage("Body harus array minimal 1 item buku"),
+  body("*.bookId").isUUID().withMessage("bookId harus UUID valid"),
+  body("*.qty")
+    .isInt({ min: 1 })
+    .withMessage("qty harus bilangan bulat minimal 1"),
+];
+
+export const returnBorrowValidation = [
+  body("borrowId").isUUID().withMessage("borrowId harus UUID valid"),
+];

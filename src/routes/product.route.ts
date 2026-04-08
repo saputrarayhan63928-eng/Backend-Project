@@ -18,12 +18,31 @@ import { uploadBookCover } from "../middlewares/upload.middleware";
 
 const router = Router();
 
-router.use(verifyToken);
 router.get('/', getAllProducts);
 router.get('/search', searchProduct);
 router.get('/:id', validate(getProductByIdValidation), getProductById);
-router.post('/', adminOnly, uploadBookCover.single("cover"), validate(createProductValidation), createProduct);
-router.put('/:id', adminOnly, uploadBookCover.single("cover"), validate(updateProductValidation), updateProduct);
-router.delete('/:id', adminOnly, validate(getProductByIdValidation), deleteProduct);
+router.post(
+  '/',
+  verifyToken,
+  adminOnly,
+  uploadBookCover.single("cover"),
+  validate(createProductValidation),
+  createProduct,
+);
+router.put(
+  '/:id',
+  verifyToken,
+  adminOnly,
+  uploadBookCover.single("cover"),
+  validate(updateProductValidation),
+  updateProduct,
+);
+router.delete(
+  '/:id',
+  verifyToken,
+  adminOnly,
+  validate(getProductByIdValidation),
+  deleteProduct,
+);
 
 export default router;

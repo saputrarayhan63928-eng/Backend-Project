@@ -37,11 +37,6 @@ export const registerValidation = [
   body("password")
     .isLength({ min: 6 })
     .withMessage("Password minimal 6 karakter"),
-
-  body("role")
-    .optional()
-    .isIn(["ADMIN", "MEMBER"])
-    .withMessage("Role harus ADMIN atau MEMBER"),
 ];
 
 export const loginValidation = [

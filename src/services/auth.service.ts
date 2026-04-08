@@ -7,7 +7,6 @@ type RegisterInput = {
   name: string;
   email: string;
   password: string;
-  role?: "ADMIN" | "MEMBER";
 };
 
 type LoginInput = {
@@ -26,7 +25,7 @@ export class AuthService {
       name: data.name.trim(),
       email: normalizedEmail,
       password: passwordHash,
-      role: data.role || "MEMBER",
+      role: "MEMBER",
     });
 
     const token = signToken({
