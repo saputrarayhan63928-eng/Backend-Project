@@ -10,16 +10,19 @@ import {
 import {
   validate,
   createUserValidation,
+  updateUserValidation,
   getUserByIdValidation,
 } from "../validations/user.validation";
+import { adminOnly, verifyToken } from "../middlewares/auth.middleware";
 
 const router = Router();
 
+router.use(verifyToken, adminOnly);
 router.get('/', getAllUsers);
 router.get('/search', searchUser);
 router.get('/:id', validate(getUserByIdValidation), getUserById);
 router.post('/', validate(createUserValidation), createUser);
-router.put('/:id', validate(createUserValidation), updateUser);
+router.put('/:id', validate(updateUserValidation), updateUser);
 router.delete('/:id', validate(getUserByIdValidation), deleteUser);
 
 export default router;

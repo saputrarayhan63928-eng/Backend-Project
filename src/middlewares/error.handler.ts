@@ -11,7 +11,7 @@ export const errorHandler = (
 ) => {
   console.error("ERROR:", err.message);
 
-  let statusCode = 500;
+  let statusCode = typeof err.statusCode === "number" ? err.statusCode : 500;
   let message = "Terjadi kesalahan server";
 
   if (err.code === 'P2002') {
@@ -22,6 +22,8 @@ export const errorHandler = (
     message = "Data tidak ditemukan";
   } else if (err.message.includes("not found") || err.message.includes("tidak ditemukan")) {
     statusCode = 404;
+    message = err.message;
+  } else if (statusCode !== 500 && err.message) {
     message = err.message;
   } else if (err.message) {
     statusCode = 400;

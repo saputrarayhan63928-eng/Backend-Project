@@ -33,12 +33,32 @@ export const createOrderValidation = [
     .withMessage("Total harus lebih dari 0"),
 
   body("userId")
+    .optional()
     .isUUID()
     .withMessage("User ID harus UUID valid"),
 
   body("status")
     .optional()
     .isIn(['pending', 'completed', 'cancelled'])
+    .withMessage("Status harus pending, completed, atau cancelled"),
+];
+
+export const updateOrderValidation = [
+  body("total")
+    .optional()
+    .isNumeric()
+    .withMessage("Total harus angka")
+    .custom((value) => Number(value) > 0)
+    .withMessage("Total harus lebih dari 0"),
+
+  body("userId")
+    .optional()
+    .isUUID()
+    .withMessage("User ID harus UUID valid"),
+
+  body("status")
+    .optional()
+    .isIn(["pending", "completed", "cancelled"])
     .withMessage("Status harus pending, completed, atau cancelled"),
 ];
 

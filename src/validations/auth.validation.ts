@@ -1,10 +1,9 @@
 import {
   body,
-  param,
   validationResult,
   type ValidationChain,
 } from "express-validator";
-import { type Request, type Response, type NextFunction } from "express";
+import { type NextFunction, type Request, type Response } from "express";
 import { errorResponse } from "../utils/response";
 
 export const validate = (validations: ValidationChain[]) => {
@@ -25,18 +24,15 @@ export const validate = (validations: ValidationChain[]) => {
   };
 };
 
-export const createUserValidation = [
+export const registerValidation = [
   body("name")
     .trim()
     .notEmpty()
-    .withMessage("Nama user wajib diisi")
+    .withMessage("Nama wajib diisi")
     .isLength({ min: 3 })
-    .withMessage("Nama user minimal 3 karakter"),
+    .withMessage("Nama minimal 3 karakter"),
 
-  body("email")
-    .isEmail()
-    .withMessage("Email harus valid")
-    .normalizeEmail(),
+  body("email").isEmail().withMessage("Email harus valid").normalizeEmail(),
 
   body("password")
     .isLength({ min: 6 })
@@ -48,31 +44,7 @@ export const createUserValidation = [
     .withMessage("Role harus ADMIN atau MEMBER"),
 ];
 
-export const updateUserValidation = [
-  body("name")
-    .optional()
-    .trim()
-    .isLength({ min: 3 })
-    .withMessage("Nama user minimal 3 karakter"),
-
-  body("email")
-    .optional()
-    .isEmail()
-    .withMessage("Email harus valid")
-    .normalizeEmail(),
-
-  body("password")
-    .optional()
-    .isLength({ min: 6 })
-    .withMessage("Password minimal 6 karakter"),
-
-  body("role")
-    .optional()
-    .isIn(["ADMIN", "MEMBER"])
-    .withMessage("Role harus ADMIN atau MEMBER"),
-];
-
-export const getUserByIdValidation = [
-  param('id')
-    .isUUID().withMessage('ID harus UUID valid')
+export const loginValidation = [
+  body("email").isEmail().withMessage("Email harus valid").normalizeEmail(),
+  body("password").notEmpty().withMessage("Password wajib diisi"),
 ];

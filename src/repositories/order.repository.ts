@@ -28,6 +28,21 @@ export class OrderRepository {
     return prisma.order.count({ where: { deletedAt: null } });
   }
 
+  static findManyByUserId(userId: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    return prisma.order.findMany({
+      where: { deletedAt: null, userId },
+      include: { user: true },
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  static countByUserId(userId: string) {
+    return prisma.order.count({ where: { deletedAt: null, userId } });
+  }
+
   static findById(id: string) {
     return prisma.order.findFirst({
       where: { id, deletedAt: null },
@@ -84,6 +99,42 @@ export class OrderRepository {
     return prisma.order.count({
       where: {
         deletedAt: null,
+        OR: [
+          { status: { contains: keyword, mode: "insensitive" } },
+          { user: { name: { contains: keyword, mode: "insensitive" } } },
+        ],
+      },
+    });
+  }
+
+  static searchByUserId(
+    userId: string,
+    keyword: string,
+    page: number,
+    limit: number,
+  ) {
+    const skip = (page - 1) * limit;
+    return prisma.order.findMany({
+      where: {
+        deletedAt: null,
+        userId,
+        OR: [
+          { status: { contains: keyword, mode: "insensitive" } },
+          { user: { name: { contains: keyword, mode: "insensitive" } } },
+        ],
+      },
+      include: { user: true },
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  static countSearchByUserId(userId: string, keyword: string) {
+    return prisma.order.count({
+      where: {
+        deletedAt: null,
+        userId,
         OR: [
           { status: { contains: keyword, mode: "insensitive" } },
           { user: { name: { contains: keyword, mode: "insensitive" } } },
