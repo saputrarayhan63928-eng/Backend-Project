@@ -17,6 +17,11 @@ enum Role {
   MEMBER
 }
 
+enum BorrowStatus {
+  BORROWED
+  RETURNED
+}
+
 model Category {
   id        String    @id @default(uuid()) @db.Uuid
   name      String    @unique
@@ -38,6 +43,7 @@ model Product {
   // === TAMBAHAN RELASI ===
   categoryId  String?   // Foreign Key
   category    Category? @relation(fields: [categoryId], references: [id])
+  borrowItems BorrowItem[]
   // =======================
 
   createdAt   DateTime @default(now())
@@ -54,6 +60,7 @@ model User {
   password  String
   role      Role     @default(MEMBER)
   orders    Order[]  // Relasi: 1 User -> Banyak Order
+  borrowRecords BorrowRecord[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
@@ -75,4 +82,33 @@ model Order {
   deletedAt   DateTime?
 
   @@map("orders")
+}
+
+model BorrowRecord {
+  id          String       @id @default(uuid()) @db.Uuid
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  status      BorrowStatus @default(BORROWED)
+  dueDate     DateTime?
+  returnedAt  DateTime?
+  notes       String?
+  items       BorrowItem[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@map("borrow_records")
+}
+
+model BorrowItem {
+  id             String       @id @default(uuid()) @db.Uuid
+  borrowRecordId String
+  borrowRecord   BorrowRecord @relation(fields: [borrowRecordId], references: [id])
+  productId      String
+  product        Product      @relation(fields: [productId], references: [id])
+  quantity       Int          @default(1)
+  createdAt      DateTime     @default(now())
+
+  @@unique([borrowRecordId, productId])
+  @@map("borrow_items")
 }

@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma";
+import { Prisma } from "@prisma/client";
 
 type CreateProductInput = {
   name: string;
@@ -42,6 +43,48 @@ export class ProductRepository {
   static findActiveById(id: string) {
     return prisma.product.findFirst({
       where: { id, deletedAt: null },
+    });
+  }
+
+  static findActiveByIds(ids: string[], db: Prisma.TransactionClient | typeof prisma = prisma) {
+    return db.product.findMany({
+      where: {
+        id: { in: ids },
+        deletedAt: null,
+      },
+    });
+  }
+
+  static decreaseStock(
+    id: string,
+    quantity: number,
+    db: Prisma.TransactionClient | typeof prisma = prisma,
+  ) {
+    return db.product.updateMany({
+      where: {
+        id,
+        deletedAt: null,
+        stock: { gte: quantity },
+      },
+      data: {
+        stock: { decrement: quantity },
+      },
+    });
+  }
+
+  static increaseStock(
+    id: string,
+    quantity: number,
+    db: Prisma.TransactionClient | typeof prisma = prisma,
+  ) {
+    return db.product.updateMany({
+      where: {
+        id,
+        deletedAt: null,
+      },
+      data: {
+        stock: { increment: quantity },
+      },
     });
   }
 
