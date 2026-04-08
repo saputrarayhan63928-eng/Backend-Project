@@ -5,6 +5,7 @@ type CreateProductInput = {
   name: string;
   author?: string;
   publishedYear?: number;
+  coverImageUrl?: string;
   description?: string;
   price: number;
   stock: number;
@@ -15,6 +16,7 @@ type UpdateProductInput = {
   name?: string;
   author?: string;
   publishedYear?: number;
+  coverImageUrl?: string;
   description?: string;
   price?: number;
   stock?: number;

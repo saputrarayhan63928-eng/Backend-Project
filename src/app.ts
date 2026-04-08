@@ -2,6 +2,7 @@ import express from 'express'
 import morgan from 'morgan'
 import helmet from 'helmet'
 import cors from 'cors'
+import path from 'node:path'
 import productRouter from './routes/product.route'
 import categoryRouter from './routes/category.route'
 import userRouter from './routes/user.route'
@@ -16,6 +17,7 @@ app.use(helmet())
 app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json())
+app.use('/public', express.static(path.join(process.cwd(), 'public')))
 
 app.use((req,res,next) =>{
     req.startTime = Date.now()

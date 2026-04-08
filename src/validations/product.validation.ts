@@ -44,6 +44,11 @@ export const createProductValidation = [
     .isInt({ min: 1000, max: 9999 })
     .withMessage("publishedYear harus tahun 4 digit valid"),
 
+  body("coverImageUrl")
+    .optional()
+    .isString()
+    .withMessage("coverImageUrl harus string"),
+
   body("price")
     .isNumeric()
     .withMessage("Harga harus angka")
@@ -79,6 +84,11 @@ export const updateProductValidation = [
     .optional()
     .isInt({ min: 1000, max: 9999 })
     .withMessage("publishedYear harus tahun 4 digit valid"),
+
+  body("coverImageUrl")
+    .optional()
+    .isString()
+    .withMessage("coverImageUrl harus string"),
 
   body("price")
     .optional()

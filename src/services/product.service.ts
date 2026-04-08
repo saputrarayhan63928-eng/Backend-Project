@@ -56,6 +56,7 @@ export class ProductService {
     name: string;
     author?: string;
     publishedYear?: number;
+    coverImageUrl?: string;
     description?: string;
     price: number;
     stock: number;
@@ -80,6 +81,7 @@ export class ProductService {
       name: string;
       author?: string;
       publishedYear?: number;
+      coverImageUrl?: string;
       price: number;
       stock: number;
       description?: string;
@@ -97,6 +99,9 @@ export class ProductService {
     if (typeof data.publishedYear === "number") {
       payload.publishedYear = data.publishedYear;
     }
+    if (typeof data.coverImageUrl === "string") {
+      payload.coverImageUrl = data.coverImageUrl;
+    }
 
     if (data.categoryId) {
       payload.categoryId = data.categoryId;
@@ -111,6 +116,7 @@ export class ProductService {
       name?: string;
       author?: string;
       publishedYear?: number;
+      coverImageUrl?: string;
       description?: string;
       price?: number;
       stock?: number;
@@ -143,6 +149,7 @@ export class ProductService {
       name?: string;
       author?: string;
       publishedYear?: number;
+      coverImageUrl?: string;
       description?: string;
       price?: number;
       stock?: number;
@@ -153,6 +160,9 @@ export class ProductService {
     if (typeof data.author === "string") payload.author = data.author.trim();
     if (typeof data.publishedYear === "number") {
       payload.publishedYear = data.publishedYear;
+    }
+    if (typeof data.coverImageUrl === "string") {
+      payload.coverImageUrl = data.coverImageUrl;
     }
     if (typeof data.description === "string") {
       payload.description = data.description.trim();
