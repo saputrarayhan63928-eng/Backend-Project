@@ -1,5 +1,5 @@
-import { UserRepository } from "../repositories/user.repository";
-import { hashPassword } from "../utils/password";
+import { UserRepository } from "../repositories/user.repository.js";
+import { hashPassword } from "../utils/password.js";
 
 export class UserService {
   static async getAll(page: number = 1, limit: number = 10) {

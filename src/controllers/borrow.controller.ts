@@ -1,15 +1,36 @@
 import { type Request, type Response } from "express";
-import { BorrowService } from "../services/borrow.service";
-import { asyncHandler } from "../utils/async.handler";
-import { successResponse } from "../utils/response";
-import { AppError } from "../utils/app.error";
+import { BorrowService } from "../services/borrow.service.js";
+import { asyncHandler } from "../utils/async.handler.js";
+import { successResponse } from "../utils/response.js";
+import { AppError } from "../utils/app.error.js";
+
+const parseString = (value: unknown): string | undefined => {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim();
+  return normalized ? normalized : undefined;
+};
 
 export const getAllBorrows = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   if (!req.authUser) throw new Error("Unauthorized");
 
-  const result = await BorrowService.getAll(page, limit, req.authUser);
+  const filters: {
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+    memberName?: string;
+  } = {};
+  const startDate = parseString(req.query.startDate);
+  const endDate = parseString(req.query.endDate);
+  const status = parseString(req.query.status);
+  const memberName = parseString(req.query.memberName);
+  if (startDate) filters.startDate = startDate;
+  if (endDate) filters.endDate = endDate;
+  if (status) filters.status = status;
+  if (memberName) filters.memberName = memberName;
+
+  const result = await BorrowService.getAll(page, limit, req.authUser, filters);
   return successResponse(res, "Daftar Riwayat Peminjaman", result);
 });
 

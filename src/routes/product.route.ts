@@ -6,15 +6,15 @@ import {
   updateProduct,
   deleteProduct,
   searchProduct,
-} from "../controllers/product.controller";
+} from "../controllers/product.controller.js";
 import {
   validate,
   createProductValidation,
   updateProductValidation,
   getProductByIdValidation,
-} from "../validations/product.validation";
-import { adminOnly, verifyToken } from "../middlewares/auth.middleware";
-import { uploadBookCover } from "../middlewares/upload.middleware";
+} from "../validations/product.validation.js";
+import { adminOnly, verifyToken } from "../middlewares/auth.middleware.js";
+import { uploadBookCover } from "../middlewares/upload.middleware.js";
 
 const router = Router();
 

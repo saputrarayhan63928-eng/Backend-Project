@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
-import { AppError } from "../utils/app.error";
+import { AppError } from "../utils/app.error.js";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {

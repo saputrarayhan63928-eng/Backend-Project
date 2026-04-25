@@ -1,0 +1,14 @@
+import { Router } from "express";
+import { getAllOrders, getOrderById, createOrder, updateOrder, deleteOrder, searchOrder, } from "../controllers/order.controller.js";
+import { validate, createOrderValidation, updateOrderValidation, getOrderByIdValidation, } from "../validations/order.validation.js";
+import { adminOnly, verifyToken } from "../middlewares/auth.middleware.js";
+const router = Router();
+router.use(verifyToken);
+router.get('/', getAllOrders);
+router.get('/search', adminOnly, searchOrder);
+router.get('/:id', validate(getOrderByIdValidation), getOrderById);
+router.post('/', validate(createOrderValidation), createOrder);
+router.put('/:id', adminOnly, validate(updateOrderValidation), updateOrder);
+router.delete('/:id', adminOnly, validate(getOrderByIdValidation), deleteOrder);
+export default router;
+//# sourceMappingURL=order.route.js.map

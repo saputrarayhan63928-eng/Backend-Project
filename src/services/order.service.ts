@@ -1,6 +1,6 @@
-import { OrderRepository } from "../repositories/order.repository";
-import { UserRepository } from "../repositories/user.repository";
-import { AppError } from "../utils/app.error";
+import { OrderRepository } from "../repositories/order.repository.js";
+import { UserRepository } from "../repositories/user.repository.js";
+import { AppError } from "../utils/app.error.js";
 
 type AuthContext = {
   userId: string;

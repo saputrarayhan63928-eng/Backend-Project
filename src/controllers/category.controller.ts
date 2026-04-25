@@ -1,7 +1,7 @@
 import { type Request, type Response } from "express";
-import { CategoryService } from "../services/category.service";
-import { asyncHandler } from "../utils/async.handler";
-import { successResponse } from "../utils/response";
+import { CategoryService } from "../services/category.service.js";
+import { asyncHandler } from "../utils/async.handler.js";
+import { successResponse } from "../utils/response.js";
 
 export const getAllCategories = asyncHandler(async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;

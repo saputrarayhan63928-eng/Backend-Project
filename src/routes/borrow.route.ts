@@ -4,13 +4,13 @@ import {
   getAllBorrows,
   getBorrowById,
   returnBorrow,
-} from "../controllers/borrow.controller";
-import { verifyToken } from "../middlewares/auth.middleware";
+} from "../controllers/borrow.controller.js";
+import { verifyToken } from "../middlewares/auth.middleware.js";
 import {
   createBorrowValidation,
   getBorrowByIdValidation,
   validate,
-} from "../validations/borrow.validation";
+} from "../validations/borrow.validation.js";
 
 const router = Router();
 

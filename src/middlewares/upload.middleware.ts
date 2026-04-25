@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import multer from "multer";
-import { AppError } from "../utils/app.error";
+import { AppError } from "../utils/app.error.js";
 
 const uploadDir = path.join(process.cwd(), "public", "uploads");
 fs.mkdirSync(uploadDir, { recursive: true });

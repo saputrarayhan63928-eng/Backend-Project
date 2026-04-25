@@ -1,6 +1,6 @@
 import { type NextFunction, type Request, type Response } from "express";
-import { AppError } from "../utils/app.error";
-import { verifyTokenPayload } from "../utils/jwt";
+import { AppError } from "../utils/app.error.js";
+import { verifyTokenPayload } from "../utils/jwt.js";
 
 export const verifyToken = (
   req: Request,
