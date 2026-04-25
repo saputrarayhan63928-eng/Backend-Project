@@ -1,6 +1,6 @@
 import { type Request, type Response, type NextFunction } from "express";
-import { errorResponse } from "../utils/response";
-import { NODE_ENV } from "../utils/env";
+import { errorResponse } from "../utils/response.js";
+import { NODE_ENV } from "../utils/env.js";
 // import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 export const errorHandler = (

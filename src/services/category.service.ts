@@ -1,4 +1,4 @@
-import { CategoryRepository } from "../repositories/category.repository";
+import { CategoryRepository } from "../repositories/category.repository.js";
 
 export class CategoryService {
   static async getAll(page: number = 1, limit: number = 10) {

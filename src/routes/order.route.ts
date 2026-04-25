@@ -6,14 +6,14 @@ import {
   updateOrder,
   deleteOrder,
   searchOrder,
-} from "../controllers/order.controller";
+} from "../controllers/order.controller.js";
 import {
   validate,
   createOrderValidation,
   updateOrderValidation,
   getOrderByIdValidation,
-} from "../validations/order.validation";
-import { adminOnly, verifyToken } from "../middlewares/auth.middleware";
+} from "../validations/order.validation.js";
+import { adminOnly, verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 

@@ -1,4 +1,4 @@
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 import { Prisma } from "@prisma/client";
 
 type CreateProductInput = {
@@ -27,24 +27,68 @@ type ProductQueryOptions = {
   page: number;
   limit: number;
   search?: string;
+  categories?: string[];
+  inStock?: boolean;
+  startYear?: number;
+  endYear?: number;
   sortBy?: "title" | "publishedYear";
   sortOrder?: "asc" | "desc";
+};
+
+const buildProductWhere = (options: {
+  search?: string;
+  categories?: string[];
+  inStock?: boolean;
+  startYear?: number;
+  endYear?: number;
+}) => {
+  const andFilters: Prisma.ProductWhereInput[] = [];
+
+  if (options.search) {
+    andFilters.push({
+      OR: [
+        { name: { contains: options.search, mode: "insensitive" } },
+        { author: { contains: options.search, mode: "insensitive" } },
+      ],
+    });
+  }
+
+  if (options.categories && options.categories.length > 0) {
+    andFilters.push({
+      OR: options.categories.map((categoryName) => ({
+        category: {
+          name: {
+            equals: categoryName,
+            mode: "insensitive",
+          },
+        },
+      })),
+    });
+  }
+
+  if (typeof options.inStock === "boolean") {
+    andFilters.push(options.inStock ? { stock: { gt: 0 } } : { stock: 0 });
+  }
+
+  if (typeof options.startYear === "number" || typeof options.endYear === "number") {
+    andFilters.push({
+      publishedYear: {
+        ...(typeof options.startYear === "number" ? { gte: options.startYear } : {}),
+        ...(typeof options.endYear === "number" ? { lte: options.endYear } : {}),
+      },
+    });
+  }
+
+  return {
+    deletedAt: null,
+    ...(andFilters.length > 0 ? { AND: andFilters } : {}),
+  };
 };
 
 export class ProductRepository {
   static findMany(options: ProductQueryOptions) {
     const skip = (options.page - 1) * options.limit;
-    const where = {
-      deletedAt: null,
-      ...(options.search
-        ? {
-            OR: [
-              { name: { contains: options.search, mode: "insensitive" as const } },
-              { author: { contains: options.search, mode: "insensitive" as const } },
-            ],
-          }
-        : {}),
-    };
+    const where = buildProductWhere(options);
 
     const orderBy =
       options.sortBy === "publishedYear"
@@ -60,18 +104,23 @@ export class ProductRepository {
     });
   }
 
-  static countAll(search?: string) {
+  static countAll(options: {
+    search?: string;
+    categories?: string[];
+    inStock?: boolean;
+    startYear?: number;
+    endYear?: number;
+  }) {
+    return prisma.product.count({
+      where: buildProductWhere(options),
+    });
+  }
+
+  static countAvailableTitles() {
     return prisma.product.count({
       where: {
         deletedAt: null,
-        ...(search
-          ? {
-              OR: [
-                { name: { contains: search, mode: "insensitive" } },
-                { author: { contains: search, mode: "insensitive" } },
-              ],
-            }
-          : {}),
+        stock: { gt: 0 },
       },
     });
   }

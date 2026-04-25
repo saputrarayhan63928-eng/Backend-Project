@@ -6,13 +6,13 @@ import {
   updateCategory,
   deleteCategory,
   searchCategory,
-} from "../controllers/category.controller";
+} from "../controllers/category.controller.js";
 import {
   validate,
   createCategoryValidation,
   getCategoryByIdValidation,
-} from "../validations/category.validation";
-import { adminOnly, verifyToken } from "../middlewares/auth.middleware";
+} from "../validations/category.validation.js";
+import { adminOnly, verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 

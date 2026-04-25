@@ -1,7 +1,7 @@
-import { UserRepository } from "../repositories/user.repository";
-import { AppError } from "../utils/app.error";
-import { signToken } from "../utils/jwt";
-import { comparePassword, hashPassword } from "../utils/password";
+import { UserRepository } from "../repositories/user.repository.js";
+import { AppError } from "../utils/app.error.js";
+import { signToken } from "../utils/jwt.js";
+import { comparePassword, hashPassword } from "../utils/password.js";
 
 type RegisterInput = {
   name: string;

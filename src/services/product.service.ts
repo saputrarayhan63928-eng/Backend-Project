@@ -1,17 +1,39 @@
-import { CategoryRepository } from "../repositories/category.repository";
-import { ProductRepository } from "../repositories/product.repository";
+import { CategoryRepository } from "../repositories/category.repository.js";
+import { ProductRepository } from "../repositories/product.repository.js";
 
 export class ProductService {
   static async getAll(params: {
     page?: number;
     limit?: number;
     search?: string;
+    categories?: string[];
+    inStock?: boolean;
+    startYear?: number;
+    endYear?: number;
     sortBy?: "title" | "publishedYear";
     sortOrder?: "asc" | "desc";
   }) {
     const safePage = Math.max(1, params.page || 1);
     const safeLimit = Math.max(1, params.limit || 10);
     const normalizedSearch = params.search?.trim();
+    const normalizedCategories = params.categories
+      ?.map((category) => category.trim())
+      .filter(Boolean);
+    const safeStartYear =
+      typeof params.startYear === "number" && params.startYear >= 1000 && params.startYear <= 9999
+        ? params.startYear
+        : undefined;
+    const safeEndYear =
+      typeof params.endYear === "number" && params.endYear >= 1000 && params.endYear <= 9999
+        ? params.endYear
+        : undefined;
+    if (
+      typeof safeStartYear === "number" &&
+      typeof safeEndYear === "number" &&
+      safeStartYear > safeEndYear
+    ) {
+      throw new Error("startYear tidak boleh lebih besar dari endYear");
+    }
     const safeSortBy = params.sortBy === "publishedYear" ? "publishedYear" : "title";
     const safeSortOrder = params.sortOrder === "desc" ? "desc" : "asc";
 
@@ -19,6 +41,10 @@ export class ProductService {
       page: number;
       limit: number;
       search?: string;
+      categories?: string[];
+      inStock?: boolean;
+      startYear?: number;
+      endYear?: number;
       sortBy: "title" | "publishedYear";
       sortOrder: "asc" | "desc";
     } = {
@@ -28,10 +54,16 @@ export class ProductService {
       sortOrder: safeSortOrder,
     };
     if (normalizedSearch) queryOptions.search = normalizedSearch;
+    if (normalizedCategories && normalizedCategories.length > 0) {
+      queryOptions.categories = normalizedCategories;
+    }
+    if (typeof params.inStock === "boolean") queryOptions.inStock = params.inStock;
+    if (typeof safeStartYear === "number") queryOptions.startYear = safeStartYear;
+    if (typeof safeEndYear === "number") queryOptions.endYear = safeEndYear;
 
     const [products, total] = await Promise.all([
       ProductRepository.findMany(queryOptions),
-      ProductRepository.countAll(normalizedSearch),
+      ProductRepository.countAll(queryOptions),
     ]);
 
     return {
@@ -40,6 +72,12 @@ export class ProductService {
       page: safePage,
       limit: safeLimit,
       search: normalizedSearch || null,
+      categories: normalizedCategories || [],
+      inStock: typeof params.inStock === "boolean" ? params.inStock : null,
+      yearRange: {
+        startYear: safeStartYear ?? null,
+        endYear: safeEndYear ?? null,
+      },
       sortBy: safeSortBy,
       sortOrder: safeSortOrder,
     };

@@ -6,14 +6,14 @@ import {
   updateUser,
   deleteUser,
   searchUser,
-} from "../controllers/user.controller";
+} from "../controllers/user.controller.js";
 import {
   validate,
   createUserValidation,
   updateUserValidation,
   getUserByIdValidation,
-} from "../validations/user.validation";
-import { adminOnly, verifyToken } from "../middlewares/auth.middleware";
+} from "../validations/user.validation.js";
+import { adminOnly, verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 

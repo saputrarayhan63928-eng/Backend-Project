@@ -1,11 +1,43 @@
 import { type Request, type Response } from "express";
-import { ProductService } from "../services/product.service";
-import { asyncHandler } from "../utils/async.handler";
-import { successResponse } from "../utils/response";
+import { ProductService } from "../services/product.service.js";
+import { asyncHandler } from "../utils/async.handler.js";
+import { successResponse } from "../utils/response.js";
 
 const parseNumber = (value: unknown): number | undefined => {
   if (typeof value === "number") return value;
   if (typeof value === "string" && value.trim() !== "") return Number(value);
+  return undefined;
+};
+
+const parseBoolean = (value: unknown): boolean | undefined => {
+  if (typeof value === "boolean") return value;
+  if (typeof value !== "string") return undefined;
+
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "true" || normalized === "1") return true;
+  if (normalized === "false" || normalized === "0") return false;
+  return undefined;
+};
+
+const parseStringList = (value: unknown): string[] | undefined => {
+  const fromString = (raw: string) =>
+    raw
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+  if (typeof value === "string") {
+    const list = fromString(value);
+    return list.length > 0 ? list : undefined;
+  }
+
+  if (Array.isArray(value)) {
+    const list = value
+      .flatMap((item) => (typeof item === "string" ? fromString(item) : []))
+      .filter(Boolean);
+    return list.length > 0 ? list : undefined;
+  }
+
   return undefined;
 };
 
@@ -52,6 +84,10 @@ export const getAllProducts = asyncHandler(async (req: Request, res: Response) =
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = typeof req.query.search === "string" ? req.query.search : undefined;
+    const categories = parseStringList(req.query.categories);
+    const inStock = parseBoolean(req.query.inStock);
+    const startYear = parseNumber(req.query.startYear);
+    const endYear = parseNumber(req.query.endYear);
     const sortBy =
       req.query.sortBy === "publishedYear" || req.query.sortBy === "title"
         ? req.query.sortBy
@@ -65,10 +101,22 @@ export const getAllProducts = asyncHandler(async (req: Request, res: Response) =
       page: number;
       limit: number;
       search?: string;
+      categories?: string[];
+      inStock?: boolean;
+      startYear?: number;
+      endYear?: number;
       sortBy?: "title" | "publishedYear";
       sortOrder?: "asc" | "desc";
     } = { page, limit };
     if (search) listParams.search = search;
+    if (categories) listParams.categories = categories;
+    if (typeof inStock === "boolean") listParams.inStock = inStock;
+    if (typeof startYear === "number" && !Number.isNaN(startYear)) {
+      listParams.startYear = startYear;
+    }
+    if (typeof endYear === "number" && !Number.isNaN(endYear)) {
+      listParams.endYear = endYear;
+    }
     if (sortBy) listParams.sortBy = sortBy;
     if (sortOrder) listParams.sortOrder = sortOrder;
 

@@ -1,7 +1,7 @@
 import { type Request, type Response } from "express";
-import { UserService } from "../services/user.service";
-import { asyncHandler } from "../utils/async.handler";
-import { successResponse } from "../utils/response";
+import { UserService } from "../services/user.service.js";
+import { asyncHandler } from "../utils/async.handler.js";
+import { successResponse } from "../utils/response.js";
 
 export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;

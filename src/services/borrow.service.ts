@@ -1,8 +1,8 @@
-import { BorrowRepository } from "../repositories/borrow.repository";
-import { ProductRepository } from "../repositories/product.repository";
-import { UserRepository } from "../repositories/user.repository";
-import { prisma } from "../lib/prisma";
-import { AppError } from "../utils/app.error";
+import { BorrowRepository } from "../repositories/borrow.repository.js";
+import { ProductRepository } from "../repositories/product.repository.js";
+import { UserRepository } from "../repositories/user.repository.js";
+import { prisma } from "../lib/prisma.js";
+import { AppError } from "../utils/app.error.js";
 
 type AuthContext = {
   userId: string;
@@ -21,23 +21,108 @@ type CreateBorrowInput = {
   items: BorrowItemInput[];
 };
 
+type BorrowListFilters = {
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+  memberName?: string;
+};
+
+const normalizeBorrowStatus = (value?: string): "BORROWED" | "RETURNED" | undefined => {
+  if (!value) return undefined;
+
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "borrowed" || normalized === "pinjam") return "BORROWED";
+  if (normalized === "returned" || normalized === "kembali") return "RETURNED";
+  throw new AppError("status harus pinjam/kembali atau borrowed/returned", 400);
+};
+
 export class BorrowService {
-  static async getAll(page: number = 1, limit: number = 10, authUser: AuthContext) {
+  static async getAll(
+    page: number = 1,
+    limit: number = 10,
+    authUser: AuthContext,
+    filters: BorrowListFilters = {},
+  ) {
     const safePage = Math.max(1, page);
     const safeLimit = Math.max(1, limit);
+    const safeStatus = normalizeBorrowStatus(filters.status);
+    const safeMemberName = filters.memberName?.trim();
+    const parsedStartDate = filters.startDate ? new Date(filters.startDate) : undefined;
+    const parsedEndDate = filters.endDate ? new Date(filters.endDate) : undefined;
+    const safeStartDate =
+      parsedStartDate && !Number.isNaN(parsedStartDate.getTime()) ? parsedStartDate : undefined;
+    const safeEndDate =
+      parsedEndDate && !Number.isNaN(parsedEndDate.getTime()) ? parsedEndDate : undefined;
+    if (filters.startDate && !safeStartDate) {
+      throw new AppError("startDate harus format tanggal valid", 400);
+    }
+    if (filters.endDate && !safeEndDate) {
+      throw new AppError("endDate harus format tanggal valid", 400);
+    }
+    if (safeStartDate && safeEndDate && safeStartDate > safeEndDate) {
+      throw new AppError("startDate tidak boleh lebih besar dari endDate", 400);
+    }
+
+    const queryFilters: {
+      status?: "BORROWED" | "RETURNED";
+      startDate?: Date;
+      endDate?: Date;
+      memberName?: string;
+    } = {};
+    if (safeStatus) queryFilters.status = safeStatus;
+    if (safeStartDate) queryFilters.startDate = safeStartDate;
+    if (safeEndDate) queryFilters.endDate = safeEndDate;
+    if (safeMemberName) queryFilters.memberName = safeMemberName;
 
     const [records, total] =
       authUser.role === "ADMIN"
         ? await Promise.all([
-            BorrowRepository.findMany(safePage, safeLimit),
-            BorrowRepository.countAll(),
+            BorrowRepository.findMany(safePage, safeLimit, queryFilters),
+            BorrowRepository.countAll(queryFilters),
           ])
         : await Promise.all([
-            BorrowRepository.findManyByUserId(authUser.userId, safePage, safeLimit),
-            BorrowRepository.countByUserId(authUser.userId),
+            (() => {
+              const memberFilters: {
+                status?: "BORROWED" | "RETURNED";
+                startDate?: Date;
+                endDate?: Date;
+              } = {};
+              if (queryFilters.status) memberFilters.status = queryFilters.status;
+              if (queryFilters.startDate) memberFilters.startDate = queryFilters.startDate;
+              if (queryFilters.endDate) memberFilters.endDate = queryFilters.endDate;
+              return BorrowRepository.findManyByUserId(
+                authUser.userId,
+                safePage,
+                safeLimit,
+                memberFilters,
+              );
+            })(),
+            (() => {
+              const memberFilters: {
+                status?: "BORROWED" | "RETURNED";
+                startDate?: Date;
+                endDate?: Date;
+              } = {};
+              if (queryFilters.status) memberFilters.status = queryFilters.status;
+              if (queryFilters.startDate) memberFilters.startDate = queryFilters.startDate;
+              if (queryFilters.endDate) memberFilters.endDate = queryFilters.endDate;
+              return BorrowRepository.countByUserId(authUser.userId, memberFilters);
+            })(),
           ]);
 
-    return { records, total, page: safePage, limit: safeLimit };
+    return {
+      records,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      filters: {
+        status: safeStatus || null,
+        startDate: safeStartDate ? safeStartDate.toISOString() : null,
+        endDate: safeEndDate ? safeEndDate.toISOString() : null,
+        memberName: authUser.role === "ADMIN" ? safeMemberName || null : null,
+      },
+    };
   }
 
   static async getById(id: string, authUser: AuthContext) {
@@ -169,5 +254,19 @@ export class BorrowService {
     const updatedRecord = await BorrowRepository.findById(id);
     if (!updatedRecord) throw new AppError("Data peminjaman tidak ditemukan", 404);
     return updatedRecord;
+  }
+
+  static async getAdminStats() {
+    const [totalAvailableBooks, activeBorrowTransactions, mostPopularBook] = await Promise.all([
+      ProductRepository.countAvailableTitles(),
+      BorrowRepository.countActiveTransactions(),
+      BorrowRepository.findMostPopularBook(),
+    ]);
+
+    return {
+      totalAvailableBooks,
+      activeBorrowTransactions,
+      mostPopularBook,
+    };
   }
 }
