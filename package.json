@@ -39,8 +39,7 @@
     "jest": "^30.3.0",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.9",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "tsx": "^4.21.0"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.0",
@@ -56,7 +55,8 @@
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
     "pg": "^8.18.0",
-    "prisma": "^7.4.0"
+    "prisma": "^7.4.0",
+    "typescript": "^5.9.3"
   },
   "imports": {
     "#*": {
